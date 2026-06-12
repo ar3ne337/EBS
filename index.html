@@ -48,11 +48,6 @@ body::after{
   pointer-events:none;
 }
 
-/* noise texture removed to eliminate any grain tint */
-body::before{
-  display:none;
-}
-
 /* ========== NAVIGATION ========== */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:500;
@@ -142,7 +137,7 @@ nav ul a:hover::after{width:100%;}
   line-height:1;
   letter-spacing:-20px;
   color:transparent;
-  -webkit-text-stroke:1px rgba(255,204,0,0.07); /* pure yellow stroke */
+  -webkit-text-stroke:1px rgba(255,204,0,0.07);
   pointer-events:none;user-select:none;
 }
 .hero-line-left{
@@ -608,7 +603,7 @@ footer{
           <div class="mc-desc">Naval assault specialist. Dominates amphibious and shipboard engagements with silent, overwhelming force. Strikes like a predator from the depths — the enemy never sees the waves coming.</div>
         </div>
       </div>
-      <!-- Operators 5-7 remain empty -->
+      <!-- Reserve slots (future operators) -->
       <div class="member-card"><div class="mc-avatar"><span class="mc-role"></span><span class="mc-initials">*</span></div><div class="mc-body"><div class="mc-codename"><span>//</span> *</div><div class="mc-name">*</div><div class="mc-desc">*</div></div></div>
       <div class="member-card"><div class="mc-avatar"><span class="mc-role"></span><span class="mc-initials">*</span></div><div class="mc-body"><div class="mc-codename"><span>//</span> *</div><div class="mc-name">*</div><div class="mc-desc">*</div></div></div>
       <div class="member-card"><div class="mc-avatar"><span class="mc-role"></span><span class="mc-initials">*</span></div><div class="mc-body"><div class="mc-codename"><span>//</span> *</div><div class="mc-name">*</div><div class="mc-desc">*</div></div></div>
@@ -621,12 +616,8 @@ footer{
     <div class="sh"><div class="sh-eyebrow">Section 03 — Field Record</div><h2 class="sh-title">Our <em>Operations</em></h2><div class="sh-rule"></div></div>
     <div class="ops-table-head"><div class="ops-th">#</div><div class="ops-th">Operation</div><div class="ops-th">Personnel</div><div class="ops-th" style="text-align:right">Status</div></div>
     <div class="ops-body">
-      <div class="op-row"><div class="op-num">01</div><div><div class="op-name">Operation Overripe</div><div class="op-detail">Full squad push on a fortified objective. Coordinated breach executed flawlessly under sustained heavy resistance. Zero casualties.</div></div><div class="op-participants"><span class="op-tag">VORTEX</span><span class="op-tag">GHOST</span><span class="op-tag">HAMMERFALL</span><span class="op-tag">BLITZ</span></div><div class="op-status-cell"><span class="op-status done">Complete</span></div></div>
-      <div class="op-row"><div class="op-num">02</div><div><div class="op-name">Operation Yellow Thunder</div><div class="op-detail">Three-phase offensive campaign across multiple sectors. Ghost's advance recon data proved decisive in the final phase push.</div></div><div class="op-participants"><span class="op-tag">ALL UNITS</span></div><div class="op-status-cell"><span class="op-status done">Complete</span></div></div>
-      <div class="op-row"><div class="op-num">03</div><div><div class="op-name">Operation Peel Back</div><div class="op-detail">Defensive hold against a numerically superior force. Hammerfall's position held through four consecutive assault waves.</div></div><div class="op-participants"><span class="op-tag">HAMMERFALL</span><span class="op-tag">SERAPH</span><span class="op-tag">ORACLE</span></div><div class="op-status-cell"><span class="op-status done">Complete</span></div></div>
-      <div class="op-row"><div class="op-num">04</div><div><div class="op-name">Operation Deep Bunch</div><div class="op-detail">Long-range coordinated strike requiring Oracle-directed repositioning at three critical junctures. Executed without detected compromise.</div></div><div class="op-participants"><span class="op-tag">ORACLE</span><span class="op-tag">GHOST</span><span class="op-tag">SLIPSTREAM</span></div><div class="op-status-cell"><span class="op-status done">Complete</span></div></div>
-      <div class="op-row"><div class="op-num">05</div><div><div class="op-name">Operation Slip Peel</div><div class="op-detail">Slipstream's flanking doctrine tested at full scale. A new encirclement approach actively rewriting the squad's offensive playbook.</div></div><div class="op-participants"><span class="op-tag">SLIPSTREAM</span><span class="op-tag">BLITZ</span><span class="op-tag">VORTEX</span></div><div class="op-status-cell"><span class="op-status live">Active</span></div></div>
-      <div class="op-row"><div class="op-num">06</div><div><div class="op-name">Operation Black Banana</div><div class="op-detail">Parameters restricted. Mission data under classification review. Debrief pending clearance.</div></div><div class="op-participants"><span class="op-tag">CLASSIFIED</span></div><div class="op-status-cell"><span class="op-status lock">Classified</span></div></div>
+    <div class="op-row"><div class="op-num">01</div><div><div class="op-name">Operation Legion</div><div class="op-detail">Recovering ML Alliance from Louis, Cyrene & Jiang in S181 (Warpath)</div></div><div class="op-participants"><span class="op-tag">ORION</span><span class="op-tag">RITUAL</span><span class="op-tag">KRAKEN</span></div><div class="op-status-cell"><span class="op-status done">Complete</span></div></div>
+    <div class="op-row"><div class="op-num">02</div><div><div class="op-name">Operation Promise</div><div class="op-detail">Causing chaos and assasinating targets S181 (Warpath)</div></div><div class="op-participants"><span class="op-tag">Entire EBS</span></div><div class="op-status-cell"><span class="op-status live">Active</span></div></div>
     </div>
   </div>
 </div>
@@ -641,16 +632,14 @@ footer{
 <footer>
   <div class="footer-brand">[EBS] <span>Elite Banana Squad</span></div>
   <ul class="footer-center"><li><a href="#about">About</a></li><li><a href="#squad">Squad</a></li><li><a href="#operations">Operations</a></li><li><a href="#videos">Archive</a></li></ul>
-  <div class="footer-copy">// Peel. Execute. Dominate.</div>
+  <div class="footer-copy">// Honour. Valour. Triumpth</div>
 </footer>
 
 <script>
-// ========== VIDEO ARCHIVE ==========
-const VIDEOS = [
-  { title: '🎵 Rickroll Reconnaissance (Example)', id: 'dQw4w9WgXcQ', date: 'Classic Meme' },
-  // Add your own mission footage:
-  // { title: 'Operation Overripe — Full Run', id: 'YOUR_ID_HERE', date: 'Jan 2026' },
-];
+// ========== VIDEO ARCHIVE - COMPLETELY BLANK, NO PRELOADED FOOTAGE ==========
+// Archive remains empty as requested. No example video, no placeholder media.
+// The interface shows a styled empty-state message when no content is present.
+const VIDEOS = [];   // Intentionally empty — clean slate for future mission records.
 
 (function renderVideos() {
   const grid = document.getElementById('videoGrid');
@@ -665,7 +654,7 @@ const VIDEOS = [
     </div>`).join('');
 })();
 
-// active nav highlight
+// active nav highlight (smooth scroll + visual feedback)
 const sections = document.querySelectorAll('[id]');
 const navLinks = document.querySelectorAll('nav ul a');
 const observer = new IntersectionObserver(entries => {
