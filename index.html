@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>[EBS] Elite Banana Squad — Tactical Unit Interface</title>
+<meta name="description" content="EBS | Elite Banana Squad: seven operators, precision coordination, adaptive strategy."/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  /* Pure black & white foundation — no tint */
+  --black:#000000;
+  --dark:#050505;
+  --panel:#0a0a0a;
+  --panel2:#0f0f0f;
+  --yellow:#ffcc00;        /* pure vibrant yellow */
+  --yellow-dim:#e6b800;
+  --yellow-glow:rgba(255,204,0,0.12);
+  --white:#ffffff;
+  --muted:#aaaaaa;
+  --faint:#444444;
+  --border:#2a2a2a;
+  --border2:#3a3a3a;
+  --glow-speed:0.25s;
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:var(--black);
+  color:var(--white);
+  font-family:'Barlow Condensed',sans-serif;
+  overflow-x:hidden;
+  cursor:default;
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar{width:6px;background:var(--dark);}
+::-webkit-scrollbar-track{background:var(--panel);}
+::-webkit-scrollbar-thumb{background:var(--yellow-dim);border-radius:0px;}
+
+/* scanline overlay – kept neutral, true black only */
+body::after{
+  content:'';
+  position:fixed;inset:0;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
+  pointer-events:none;
+}
+
+/* noise texture removed to eliminate any grain tint */
+body::before{
+  display:none;
+}
+
+/* ========== NAVIGATION ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 56px;
+  background:rgba(0,0,0,0.94);
+  border-bottom:1px solid var(--border2);
+  backdrop-filter:blur(12px);
+  transition:background 0.2s;
+}
+.nav-brand{
+  display:flex;align-items:center;gap:14px;
+  text-decoration:none;
+}
+.nav-emblem{
+  width:34px;height:34px;
+  border:1px solid var(--yellow);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:13px;letter-spacing:1px;
+  color:var(--yellow);
+  position:relative;
+  transition:box-shadow 0.2s;
+}
+.nav-emblem::before,.nav-emblem::after{
+  content:'';position:absolute;
+  background:var(--yellow);
+}
+.nav-emblem::before{width:4px;height:4px;top:-2px;left:-2px;}
+.nav-emblem::after{width:4px;height:4px;bottom:-2px;right:-2px;}
+.nav-wordmark{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:18px;letter-spacing:3px;
+  color:var(--yellow);
+}
+.nav-wordmark span{color:rgba(255,255,255,0.5)}
+nav ul{
+  display:flex;gap:36px;list-style:none;
+  align-items:center;
+}
+nav ul a{
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;letter-spacing:3px;
+  color:var(--faint);
+  text-decoration:none;
+  text-transform:uppercase;
+  transition:color .2s;
+  position:relative;
+}
+nav ul a::after{
+  content:'';position:absolute;left:0;bottom:-4px;
+  width:0;height:1px;
+  background:var(--yellow);
+  transition:width .25s;
+}
+nav ul a:hover{color:var(--yellow);}
+nav ul a:hover::after{width:100%;}
+
+/* ========== HERO ========== */
+#home{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:flex-start;
+  padding:120px 56px 90px;
+  position:relative;
+  overflow:hidden;
+}
+.grid-bg{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:60px 60px;
+  opacity:.35;
+  pointer-events:none;
+}
+.grid-bg::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 70% at 20% 50%, transparent 30%, var(--black) 100%);
+}
+.hero-ghost{
+  position:absolute;
+  right:-40px;top:50%;transform:translateY(-50%);
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(260px,38vw,520px);
+  line-height:1;
+  letter-spacing:-20px;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(255,204,0,0.07); /* pure yellow stroke */
+  pointer-events:none;user-select:none;
+}
+.hero-line-left{
+  position:absolute;left:56px;top:0;bottom:0;
+  width:1px;background:linear-gradient(to bottom,transparent,var(--yellow-dim) 30%,var(--yellow-dim) 70%,transparent);
+  opacity:.3;
+}
+.hero-content{position:relative;z-index:2;}
+.hero-sys{
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;letter-spacing:4px;
+  color:var(--yellow);
+  margin-bottom:28px;
+  display:flex;align-items:center;gap:12px;
+}
+.hero-sys::before{
+  content:'';display:inline-block;
+  width:24px;height:1px;background:var(--yellow);
+}
+.hero-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(70px,11vw,145px);
+  line-height:.88;
+  letter-spacing:3px;
+  margin-bottom:6px;
+}
+.hero-title .tag{color:var(--yellow);display:inline-block;font-size:.65em;letter-spacing:6px;margin-right:12px;}
+.hero-title .line2{display:block;color:var(--white);}
+.hero-title .line3{display:block;color:rgba(255,255,255,0.18);-webkit-text-stroke:1px rgba(255,255,255,0.18);}
+.hero-divider{
+  width:100px;height:1px;
+  background:linear-gradient(to right,var(--yellow),transparent);
+  margin:32px 0;
+}
+.hero-desc{
+  max-width:520px;
+  font-size:17px;
+  color:var(--muted);
+  line-height:1.75;
+  font-weight:300;
+  margin-bottom:52px;
+}
+.hero-stats{display:flex;gap:0;margin-bottom:60px;flex-wrap:wrap;}
+.hero-stat{padding:0 36px 0 0;margin-right:36px;border-right:1px solid var(--border2);}
+.hero-stat:last-child{border-right:none;margin-right:0;padding-right:0;}
+.hero-stat-num{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;color:var(--yellow);}
+.hero-stat-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--faint);text-transform:uppercase;margin-top:2px;}
+.hero-cta{display:flex;align-items:center;gap:32px;flex-wrap:wrap;}
+.cta-btn{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:15px;letter-spacing:4px;
+  color:var(--black);
+  background:var(--yellow);
+  border:none;
+  padding:14px 32px;
+  text-decoration:none;
+  display:inline-block;
+  transition:background .2s,transform .15s;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
+}
+.cta-btn:hover{background:var(--yellow-dim);transform:translateY(-2px);}
+.cta-ghost-btn{
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;letter-spacing:3px;
+  color:var(--muted);
+  text-decoration:none;
+  border-bottom:1px solid var(--border2);
+  padding-bottom:2px;
+  transition:color .2s,border-color .2s;
+}
+.cta-ghost-btn:hover{color:var(--yellow);border-color:var(--yellow);}
+.scroll-ticker{
+  position:absolute;bottom:36px;left:56px;
+  display:flex;align-items:center;gap:12px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:3px;
+  color:var(--faint);
+}
+.scroll-ticker-line{
+  width:40px;height:1px;
+  background:linear-gradient(to right,var(--yellow),transparent);
+  animation:tick 2s ease-in-out infinite;
+}
+@keyframes tick{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* ========== SECTION SHARED ========== */
+.section-wrap{padding:120px 0;}
+.section-wrap.alt{background:var(--dark);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.section-inner{max-width:1280px;margin:0 auto;padding:0 56px;}
+.sh{margin-bottom:72px;}
+.sh-eyebrow{
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;letter-spacing:5px;
+  color:var(--yellow);
+  text-transform:uppercase;
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:14px;
+}
+.sh-eyebrow::before{content:'';display:inline-block;width:18px;height:1px;background:var(--yellow);}
+.sh-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(52px,7vw,92px);
+  line-height:.95;
+  letter-spacing:2px;
+  color:var(--white);
+}
+.sh-title em{font-style:normal;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,0.2);}
+.sh-rule{width:64px;height:2px;background:var(--yellow);margin-top:22px;}
+
+/* ========== ABOUT ========== */
+.about-layout{
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:80px;
+  align-items:start;
+}
+.about-text p{font-size:17px;color:var(--muted);line-height:1.85;margin-bottom:22px;font-weight:300;}
+.about-text p strong{color:var(--white);font-weight:600;}
+.about-panel{display:flex;flex-direction:column;gap:2px;}
+.about-card{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  padding:22px 26px;
+  position:relative;
+  transition:border-color .25s,background .25s;
+  overflow:hidden;
+}
+.about-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:2px;background:var(--yellow);
+  transform:scaleY(0);
+  transform-origin:bottom;
+  transition:transform .3s ease;
+}
+.about-card:hover{border-color:var(--border2);background:var(--panel);}
+.about-card:hover::before{transform:scaleY(1);}
+.about-card-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--yellow);text-transform:uppercase;margin-bottom:8px;}
+.about-card-val{font-size:15px;color:#cccccc;line-height:1.6;}
+.about-card-val strong{color:var(--white);}
+
+/* ========== SQUAD - FLEX CENTERED ROWS ========== */
+.squad-grid{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  margin: 0 auto;
+}
+.member-card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  position:relative;
+  overflow:hidden;
+  transition:transform 0.25s ease, border-color 0.2s;
+  cursor:default;
+  flex: 0 0 calc(25% - 2px);
+  min-width: 240px;
+  max-width: 340px;
+}
+.member-card:hover{
+  transform:translateY(-6px);
+  border-color:var(--yellow);
+  z-index:2;
+}
+.member-card::after{
+  content:'';position:absolute;top:0;right:0;
+  width:0;height:0;
+  border-style:solid;
+  border-width:0 28px 28px 0;
+  border-color:transparent var(--yellow) transparent transparent;
+  opacity:0;
+  transition:opacity .3s;
+}
+.member-card:hover::after{opacity:1;}
+.mc-avatar{
+  height:190px;
+  background:var(--dark);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  overflow:hidden;
+}
+.mc-avatar::before{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(110deg,transparent 40%,rgba(255,204,0,0.06) 50%,transparent 60%);
+  transform:translateX(-200%);
+  transition:transform .6s ease;
+}
+.member-card:hover .mc-avatar::before{transform:translateX(200%);}
+.mc-initials{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:64px;
+  letter-spacing:6px;
+  color:rgba(255,204,0,0.1);
+  transition:color .3s;
+  position:relative;z-index:1;
+}
+.member-card:hover .mc-initials{color:rgba(255,204,0,0.3);}
+.mc-role{
+  position:absolute;top:14px;left:14px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;letter-spacing:2px;
+  color:var(--yellow);
+  background:rgba(0,0,0,0.85);
+  border:1px solid rgba(255,204,0,0.3);
+  padding:4px 8px;
+  text-transform:uppercase;
+  backdrop-filter:blur(2px);
+}
+.mc-body{padding:20px 20px 22px;}
+.mc-codename{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--yellow);margin-bottom:2px;}
+.mc-codename span{color:rgba(255,204,0,0.4);font-size:.7em;margin-right:2px;}
+.mc-name{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--faint);margin-bottom:12px;text-transform:uppercase;}
+.mc-desc{font-size:13px;color:#bbbbbb;line-height:1.65;}
+
+/* ========== OPERATIONS ========== */
+.ops-table{width:100%;border-collapse:collapse;}
+.ops-table-head{
+  display:grid;
+  grid-template-columns:64px 1fr 320px 110px;
+  gap:0;
+  padding:0 0 10px;
+  border-bottom:1px solid var(--border2);
+  margin-bottom:4px;
+}
+.ops-th{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:3px;
+  color:var(--faint);
+  text-transform:uppercase;
+}
+.ops-body{display:flex;flex-direction:column;gap:0;}
+.op-row{
+  display:grid;
+  grid-template-columns:64px 1fr 320px 110px;
+  gap:0;
+  align-items:center;
+  padding:26px 0;
+  border-bottom:1px solid var(--border);
+  position:relative;
+  transition:background .2s;
+}
+.op-row:last-child{border-bottom:none;}
+.op-row::after{
+  content:'';position:absolute;left:0;right:0;top:0;
+  height:1px;background:var(--yellow);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .4s ease;
+}
+.op-row:hover::after{transform:scaleX(1);}
+.op-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:36px;color:rgba(255,204,0,0.25);
+  line-height:1;
+  transition:color .2s;
+}
+.op-row:hover .op-num{color:rgba(255,204,0,0.6);}
+.op-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--white);margin-bottom:3px;}
+.op-detail{font-size:13px;color:#bbbbbb;max-width:480px;line-height:1.5;}
+.op-participants{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px;}
+.op-tag{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:1px;
+  color:var(--faint);
+  border:1px solid var(--border2);
+  padding:3px 7px;
+  background:rgba(0,0,0,0.6);
+}
+.op-status-cell{text-align:right;}
+.op-status{
+  display:inline-block;
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:2px;
+  padding:5px 12px;
+  text-transform:uppercase;
+  border:1px solid;
+}
+.op-status.done{color:#ffcc00;border-color:rgba(255,204,0,0.4);background:rgba(255,204,0,0.05);}
+.op-status.live{color:#4dd;border-color:rgba(68,221,221,0.4);background:rgba(68,221,221,0.05);}
+.op-status.lock{color:#f55;border-color:rgba(255,85,85,0.4);background:rgba(255,85,85,0.05);}
+
+/* ========== VIDEO ARCHIVE ========== */
+.video-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(360px,1fr));
+  gap:2px;
+}
+.vc{
+  background:var(--panel);
+  border:1px solid var(--border);
+  overflow:hidden;
+  transition:border-color .25s,transform .25s;
+}
+.vc:hover{border-color:var(--border2);transform:translateY(-3px);}
+.vc-thumb{position:relative;aspect-ratio:16/9;background:#0a0a0a;overflow:hidden;}
+.vc-thumb iframe{width:100%;height:100%;border:none;display:block;}
+.vc-meta{padding:18px 20px 20px;border-top:1px solid var(--border);}
+.vc-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--white);margin-bottom:4px;}
+.vc-date{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--faint);}
+.archive-empty{
+  grid-column:1/-1;
+  padding:80px 0;text-align:center;
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;letter-spacing:4px;
+  color:var(--border2);
+  text-transform:uppercase;
+  border:1px solid var(--border);
+  background:var(--panel);
+}
+
+/* ========== FOOTER ========== */
+footer{
+  border-top:1px solid var(--border);
+  padding:48px 56px;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:24px;
+}
+.footer-brand{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:4px;color:var(--yellow);}
+.footer-brand span{color:rgba(255,255,255,0.4);}
+.footer-center{display:flex;gap:28px;list-style:none;}
+.footer-center a{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--faint);text-decoration:none;text-transform:uppercase;transition:color .2s;}
+.footer-center a:hover{color:var(--yellow);}
+.footer-copy{text-align:right;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--faint);}
+
+/* ========== RESPONSIVE ========== */
+@media(max-width:1100px){
+  .member-card{flex: 0 0 calc(33.333% - 2px);}
+}
+@media(max-width:860px){
+  .member-card{flex: 0 0 calc(50% - 2px);}
+}
+@media(max-width:600px){
+  .member-card{flex: 0 0 100%;max-width:100%;}
+}
+@media(max-width:1024px){
+  .about-layout{grid-template-columns:1fr;}
+  .ops-table-head{display:none;}
+  .op-row{grid-template-columns:48px 1fr auto;grid-template-rows:auto auto;}
+  .op-detail{grid-column:2;}
+  .op-participants{display:none;}
+  .hero-stats{gap:16px;}
+}
+@media(max-width:768px){
+  nav{padding:0 24px;}
+  nav ul{gap:20px;}
+  #home{padding:100px 24px 80px;}
+  .hero-line-left{left:24px;}
+  .section-inner{padding:0 24px;}
+  .section-wrap{padding:80px 0;}
+  .video-grid{grid-template-columns:1fr;}
+  footer{grid-template-columns:1fr;text-align:center;}
+  .footer-copy{text-align:center;}
+  .footer-center{justify-content:center;}
+}
+@media(max-width:480px){
+  .hero-title{font-size:58px;}
+  .hero-stats{flex-direction:column;gap:20px;}
+  .hero-stat{border-right:none;padding:0;}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#home">
+    <div class="nav-emblem">EBS</div>
+    <div class="nav-wordmark">[EBS] <span>Elite Banana Squad</span></div>
+  </a>
+  <ul>
+    <li><a href="#about">About</a></li>
+    <li><a href="#squad">Squad</a></li>
+    <li><a href="#operations">Ops</a></li>
+    <li><a href="#videos">Archive</a></li>
+  </ul>
+</nav>
+
+<div id="home">
+  <div class="grid-bg"></div>
+  <div class="hero-ghost">EBS</div>
+  <div class="hero-line-left"></div>
+  <div class="hero-content">
+    <div class="hero-sys">TASKFORCE IDENTIFIER · EBS-001 · STATUS: ACTIVE</div>
+    <h1 class="hero-title">
+      <span class="tag">[EBS]</span><br>
+      <span class="line2">Elite Banana</span>
+      <span class="line3">Squad</span>
+    </h1>
+    <div class="hero-divider"></div>
+    <p class="hero-desc">Seven operators. One cohesive unit. The <strong>Elite Banana Squad</strong> is a disciplined tactical taskforce built on precision coordination, adaptive strategy, and an unshakeable bond.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num">07</div><div class="hero-stat-label">Operators</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">06</div><div class="hero-stat-label">Operations</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">01</div><div class="hero-stat-label">Objective</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">∞</div><div class="hero-stat-label">Commitment</div></div>
+    </div>
+    <div class="hero-cta"><a href="#squad" class="cta-btn">Meet the Squad</a><a href="#videos" class="cta-ghost-btn">View Archive →</a></div>
+  </div>
+  <div class="scroll-ticker"><div class="scroll-ticker-line"></div>SCROLL TO DEPLOY</div>
+</div>
+
+<div class="section-wrap alt" id="about">
+  <div class="section-inner">
+    <div class="sh"><div class="sh-eyebrow">Section 01 — Identity</div><h2 class="sh-title">About the <em>Squad</em></h2><div class="sh-rule"></div></div>
+    <div class="about-layout">
+      <div class="about-text"><p>The <strong>[EBS] Elite Banana Squad</strong> was forged from a shared belief: that a coordinated, disciplined unit will always outperform a collection of individuals — no matter how skilled. From day one, every decision, every strategy, and every operation has been built on that foundation.</p>
+      <p>We operate with <strong>calculated precision</strong>. Before contact, we plan. During contact, we adapt. After contact, we debrief, improve, and come back sharper. The tactical playbook is always evolving — but the core never wavers.</p>
+      <p>EBS is not just a group of players. It is a unit with <strong>structure, roles, and accountability</strong>. Each operator has a defined purpose. Each mission has a defined objective. Nothing is left to chance.</p></div>
+      <div class="about-panel">
+        <div class="about-card"><div class="about-card-label">// Mission</div><div class="about-card-val">Operate with precision. Create Bond. Have Fun.</div></div>
+        <div class="about-card"><div class="about-card-label">// Doctrine</div><div class="about-card-val"><strong>Coordination</strong> over raw skill · <strong>Discipline</strong> over impulse · <strong>Adaptability</strong> over rigidity</div></div>
+        <div class="about-card"><div class="about-card-label">// Founded</div><div class="about-card-val">Built from scratch by seven operators with one shared conviction: teamwork is the only weapon that never jams.</div></div>
+        <div class="about-card"><div class="about-card-label">// Current Status</div><div class="about-card-val">Active — Operational. Executing missions, building the record.</div></div>
+        <div class="about-card"><div class="about-card-label">// Motto</div><div class="about-card-val"><em style="color:var(--yellow);font-style:normal;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;">Honour. Valour. Triumpth</em></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-wrap" id="squad">
+  <div class="section-inner">
+    <div class="sh"><div class="sh-eyebrow">Section 02 — Personnel</div><h2 class="sh-title">Meet Our <em>Squad</em></h2><div class="sh-rule"></div></div>
+    <div class="squad-grid">
+      <!-- Operator 1: Commander -->
+      <div class="member-card">
+        <div class="mc-avatar"><span class="mc-role">Commander</span><span class="mc-initials">B101</span></div>
+        <div class="mc-body">
+          <div class="mc-codename"><span>//</span> ORION</div>
+          <div class="mc-name">Emka E. J.</div>
+          <div class="mc-desc">Commander. Coordinates all squad maneuvers from the front with ice‑cold precision. Master strategist who turns chaos into order, and the unbreakable chain that holds the unit together under fire.</div>
+        </div>
+      </div>
+      <!-- Operator 2: Second-In-Command -->
+      <div class="member-card">
+        <div class="mc-avatar"><span class="mc-role">Second-In-Command</span><span class="mc-initials">B777</span></div>
+        <div class="mc-body">
+          <div class="mc-codename"><span>//</span> FIRE</div>
+          <div class="mc-name">Classified</div>
+          <div class="mc-desc">Second‑in‑command. Seamlessly executes intent while commanding engagements. The squad's relentless flame — always where the fight is hottest, never wavering.</div>
+        </div>
+      </div>
+      <!-- Operator 3: Diplomat -->
+      <div class="member-card">
+        <div class="mc-avatar"><span class="mc-role">Diplomat</span><span class="mc-initials">B337</span></div>
+        <div class="mc-body">
+          <div class="mc-codename"><span>//</span> RITUAL</div>
+          <div class="mc-name">Arene S. H.</div>
+          <div class="mc-desc">Diplomat & intelligence liaison. Operates deep in the shadows, forging alliances and extracting critical intel before ops go live. A master of subtle persuasion and off‑grid negotiations.</div>
+        </div>
+      </div>
+      <!-- Operator 4: Admiral -->
+      <div class="member-card">
+        <div class="mc-avatar"><span class="mc-role">Admiral</span><span class="mc-initials">B581</span></div>
+        <div class="mc-body">
+          <div class="mc-codename"><span>//</span> KRAKEN</div>
+          <div class="mc-name">Classified</div>
+          <div class="mc-desc">Naval assault specialist. Dominates amphibious and shipboard engagements with silent, overwhelming force. Strikes like a predator from the depths — the enemy never sees the waves coming.</div>
+        </div>
+      </div>
+      <!-- Operators 5-7 remain empty -->
+      <div class="member-card"><div class="mc-avatar"><span class="mc-role"></span><span class="mc-initials">*</span></div><div class="mc-body"><div class="mc-codename"><span>//</span> *</div><div class="mc-name">*</div><div class="mc-desc">*</div></div></div>
+      <div class="member-card"><div class="mc-avatar"><span class="mc-role"></span><span class="mc-initials">*</span></div><div class="mc-body"><div class="mc-codename"><span>//</span> *</div><div class="mc-name">*</div><div class="mc-desc">*</div></div></div>
+      <div class="member-card"><div class="mc-avatar"><span class="mc-role"></span><span class="mc-initials">*</span></div><div class="mc-body"><div class="mc-codename"><span>//</span> *</div><div class="mc-name">*</div><div class="mc-desc">*</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section-wrap alt" id="operations">
+  <div class="section-inner">
+    <div class="sh"><div class="sh-eyebrow">Section 03 — Field Record</div><h2 class="sh-title">Our <em>Operations</em></h2><div class="sh-rule"></div></div>
+    <div class="ops-table-head"><div class="ops-th">#</div><div class="ops-th">Operation</div><div class="ops-th">Personnel</div><div class="ops-th" style="text-align:right">Status</div></div>
+    <div class="ops-body">
+      <div class="op-row"><div class="op-num">01</div><div><div class="op-name">Operation Overripe</div><div class="op-detail">Full squad push on a fortified objective. Coordinated breach executed flawlessly under sustained heavy resistance. Zero casualties.</div></div><div class="op-participants"><span class="op-tag">VORTEX</span><span class="op-tag">GHOST</span><span class="op-tag">HAMMERFALL</span><span class="op-tag">BLITZ</span></div><div class="op-status-cell"><span class="op-status done">Complete</span></div></div>
+      <div class="op-row"><div class="op-num">02</div><div><div class="op-name">Operation Yellow Thunder</div><div class="op-detail">Three-phase offensive campaign across multiple sectors. Ghost's advance recon data proved decisive in the final phase push.</div></div><div class="op-participants"><span class="op-tag">ALL UNITS</span></div><div class="op-status-cell"><span class="op-status done">Complete</span></div></div>
+      <div class="op-row"><div class="op-num">03</div><div><div class="op-name">Operation Peel Back</div><div class="op-detail">Defensive hold against a numerically superior force. Hammerfall's position held through four consecutive assault waves.</div></div><div class="op-participants"><span class="op-tag">HAMMERFALL</span><span class="op-tag">SERAPH</span><span class="op-tag">ORACLE</span></div><div class="op-status-cell"><span class="op-status done">Complete</span></div></div>
+      <div class="op-row"><div class="op-num">04</div><div><div class="op-name">Operation Deep Bunch</div><div class="op-detail">Long-range coordinated strike requiring Oracle-directed repositioning at three critical junctures. Executed without detected compromise.</div></div><div class="op-participants"><span class="op-tag">ORACLE</span><span class="op-tag">GHOST</span><span class="op-tag">SLIPSTREAM</span></div><div class="op-status-cell"><span class="op-status done">Complete</span></div></div>
+      <div class="op-row"><div class="op-num">05</div><div><div class="op-name">Operation Slip Peel</div><div class="op-detail">Slipstream's flanking doctrine tested at full scale. A new encirclement approach actively rewriting the squad's offensive playbook.</div></div><div class="op-participants"><span class="op-tag">SLIPSTREAM</span><span class="op-tag">BLITZ</span><span class="op-tag">VORTEX</span></div><div class="op-status-cell"><span class="op-status live">Active</span></div></div>
+      <div class="op-row"><div class="op-num">06</div><div><div class="op-name">Operation Black Banana</div><div class="op-detail">Parameters restricted. Mission data under classification review. Debrief pending clearance.</div></div><div class="op-participants"><span class="op-tag">CLASSIFIED</span></div><div class="op-status-cell"><span class="op-status lock">Classified</span></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section-wrap" id="videos">
+  <div class="section-inner">
+    <div class="sh"><div class="sh-eyebrow">Section 04 — Mission Footage</div><h2 class="sh-title">Video <em>Archive</em></h2><div class="sh-rule"></div></div>
+    <div class="video-grid" id="videoGrid"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">[EBS] <span>Elite Banana Squad</span></div>
+  <ul class="footer-center"><li><a href="#about">About</a></li><li><a href="#squad">Squad</a></li><li><a href="#operations">Operations</a></li><li><a href="#videos">Archive</a></li></ul>
+  <div class="footer-copy">// Peel. Execute. Dominate.</div>
+</footer>
+
+<script>
+// ========== VIDEO ARCHIVE ==========
+const VIDEOS = [
+  { title: '🎵 Rickroll Reconnaissance (Example)', id: 'dQw4w9WgXcQ', date: 'Classic Meme' },
+  // Add your own mission footage:
+  // { title: 'Operation Overripe — Full Run', id: 'YOUR_ID_HERE', date: 'Jan 2026' },
+];
+
+(function renderVideos() {
+  const grid = document.getElementById('videoGrid');
+  if (!VIDEOS.length) {
+    grid.innerHTML = '<div class="archive-empty">⏻ NO FOOTAGE LOGGED YET. STAND BY FOR MISSION RECORDS.</div>';
+    return;
+  }
+  grid.innerHTML = VIDEOS.map(v => `
+    <div class="vc">
+      <div class="vc-thumb"><iframe src="https://www.youtube.com/embed/${v.id}?rel=0&modestbranding=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+      <div class="vc-meta"><div class="vc-title">${v.title}</div><div class="vc-date">${v.date || ''}</div></div>
+    </div>`).join('');
+})();
+
+// active nav highlight
+const sections = document.querySelectorAll('[id]');
+const navLinks = document.querySelectorAll('nav ul a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + e.target.id ? 'var(--yellow)' : '';
+      });
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
